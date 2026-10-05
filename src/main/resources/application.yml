@@ -1,0 +1,127 @@
+spring:
+  application:
+    name: hr-management-system
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5437/hr}
+    username: ${DB_USERNAME:hr}
+    password: ${DB_PASSWORD:hr}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: hr-pool
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8091}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  jwt:
+    # HS256 signing secret, at least 32 bytes. The default is for local development only.
+    secret: ${JWT_SECRET:dev-only-hr-secret-change-me-0123456789abcdef}
+    expiration: ${JWT_EXPIRATION:PT8H}
+  bootstrap-admin:
+    # Seeded on startup only when no ADMIN exists. These defaults are DEV-ONLY —
+    # always override HR_ADMIN_EMAIL / HR_ADMIN_PASSWORD outside local development.
+    email: ${HR_ADMIN_EMAIL:admin@hr.local}
+    password: ${HR_ADMIN_PASSWORD:Admin@12345}
+  employees:
+    max-page-size: 100
+  leave:
+    # Weekend is regional: Egypt rests on Friday and Saturday. Any comma-separated
+    # java.time.DayOfWeek list works, e.g. SATURDAY,SUNDAY.
+    weekend-days: ${LEAVE_WEEKEND_DAYS:FRIDAY,SATURDAY}
+    max-page-size: 100
+    annual:
+      # true  = the (pro-rated) yearly ANNUAL entitlement is granted upfront when the
+      #         balance row is created.
+      # false = the entitlement starts at 0 and is built up by the monthly accrual job.
+      # The two are alternatives, and that is enforced: while upfront=true every accrual
+      # run is refused with 409, and booting with accrual.enabled=true as well fails fast.
+      upfront: ${LEAVE_ANNUAL_UPFRONT:true}
+    accrual:
+      # Off by default (and therefore off in tests); requires upfront=false. Running it is
+      # idempotent per (employee, year, month); HR can also trigger it with
+      # POST /api/leave/accrual/run.
+      enabled: ${LEAVE_ACCRUAL_ENABLED:false}
+      cron: ${LEAVE_ACCRUAL_CRON:0 30 1 1 * *}
+      zone: ${LEAVE_ACCRUAL_ZONE:UTC}
+  attendance:
+    # Attendance is a local-time concept: every instant is rendered in this zone to get a
+    # work day and a wall-clock time. The weekend and the holidays come from app.leave.
+    zone: ${ATTENDANCE_ZONE:Africa/Cairo}
+    work-start: ${ATTENDANCE_WORK_START:09:00}
+    work-end: ${ATTENDANCE_WORK_END:17:00}
+    # Arriving at exactly work-start + grace is still on time.
+    grace-minutes: ${ATTENDANCE_GRACE_MINUTES:15}
+    # Hard ceiling on the overtime credited for one day (4 hours).
+    max-overtime-minutes-per-day: ${ATTENDANCE_MAX_OVERTIME_MINUTES:240}
+    # A session still open this long after its check-in is treated as abandoned: the day
+    # reads MISSING_CHECKOUT, contributes no minutes, and HR has to correct it.
+    auto-close-after-hours: ${ATTENDANCE_AUTO_CLOSE_AFTER_HOURS:16}
+  payroll:
+    # ------------------------------------------------------------------------------
+    # ILLUSTRATIVE, SIMPLIFIED RATES. They are a plausible-looking example, not the
+    # real law of any country, and this project is NOT tax or legal advice.
+    # Every value is captured in each payslip's JSON snapshot, so changing anything
+    # here only affects future runs — never a payslip that already exists.
+    # ------------------------------------------------------------------------------
+    working-hours-per-day: ${PAYROLL_WORKING_HOURS_PER_DAY:8}
+    overtime-multiplier: ${PAYROLL_OVERTIME_MULTIPLIER:1.5}
+    holiday-overtime-multiplier: ${PAYROLL_HOLIDAY_OVERTIME_MULTIPLIER:2.0}
+    insurance:
+      # Employee share, charged on the monthly base clamped into the insurable band.
+      employee-rate: ${PAYROLL_INSURANCE_EMPLOYEE_RATE:0.11}
+      min-insurable: ${PAYROLL_INSURANCE_MIN:2000.00}
+      max-insurable: ${PAYROLL_INSURANCE_MAX:12600.00}
+    tax:
+      personal-exemption-monthly: ${PAYROLL_PERSONAL_EXEMPTION:1250.00}
+      # Marginal monthly brackets; the last one has no `up-to` and is open-ended.
+      brackets:
+        - up-to: 1500.00
+          rate: 0.000
+        - up-to: 3000.00
+          rate: 0.100
+        - up-to: 5000.00
+          rate: 0.150
+        - up-to: 8000.00
+          rate: 0.200
+        - up-to: 12000.00
+          rate: 0.225
+        - rate: 0.250
+    company:
+      name: ${PAYROLL_COMPANY_NAME:Example Holding}
+      address: ${PAYROLL_COMPANY_ADDRESS:12 Nile Corniche, Cairo, Egypt}
+
+logging:
+  level:
+    com.example.hr: ${LOG_LEVEL_APP:INFO}

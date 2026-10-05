@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hr-management-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hr
+      POSTGRES_USER: hr
+      POSTGRES_PASSWORD: hr
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hr -d hr"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  # Optional: docker compose --profile app up -d --build
+  app:
+    profiles: ["app"]
+    build: .
+    image: hr-management-system:local
+    container_name: hr-management-app
+    restart: unless-stopped
+    ports:
+      - "8091:8091"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/hr
+      DB_USERNAME: ${DB_USERNAME:-hr}
+      DB_PASSWORD: ${DB_PASSWORD:-hr}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-10}
+      SERVER_PORT: ${SERVER_PORT:-8091}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-hr-secret-change-me-0123456789abcdef}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-PT8H}
+      HR_ADMIN_EMAIL: ${HR_ADMIN_EMAIL:-admin@hr.local}
+      HR_ADMIN_PASSWORD: ${HR_ADMIN_PASSWORD:-Admin@12345}
+      LOG_LEVEL_APP: ${LOG_LEVEL_APP:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+    name: hr-management-postgres-data
