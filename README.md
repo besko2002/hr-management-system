@@ -23,7 +23,8 @@ A Spring Boot 3.5 / Java 21 HR backend.
 > legal advice**. All of it is configuration, and every payslip stores the configuration it
 > was computed with.
 
-The React frontend is Phase 5 (see [PLAN.md](PLAN.md)).
+A **React + TypeScript frontend** (`frontend/`) covers all three roles: employee self-service, manager approvals, and HR/admin
+tools (see [Frontend](#frontend)).
 
 ## Run it
 
@@ -540,4 +541,30 @@ and days after leaving are not counted as absences.
 - Leave is whole days only (no half days); attendance check-in/out is by API, there is no device integration.
 - The default `JWT_SECRET`, `admin@hr.local` / `Admin@12345` are for local development only: change them for any
   real deployment.
-- React frontend: coming next.
+- The frontend consumes the API as-is: it hides what a role cannot use, but the server is always the authority.
+- No dedicated mobile layout beyond a responsive sidebar; no i18n (English only).
+
+## Frontend
+
+React 18 + TypeScript + Vite, plain CSS (no UI library), served by nginx in Docker (it proxies `/api` to the backend).
+
+```bash
+docker compose --profile app up -d --build      # backend + PostgreSQL + frontend  ->  http://localhost:5175
+# development:  cd frontend && npm install && npm run dev      (proxies /api to :8091)
+```
+
+| Role | Screens |
+|---|---|
+| Everyone | Dashboard (check in/out, balances), Leave requests, Attendance, own Payslips (PDF), Org chart, Profile |
+| Managers (anyone with reports) | My team, Approvals (approve / reject with note), Team calendar, Team today |
+| HR / ADMIN | Employees (search, filters), create/edit/terminate, set manager, audit tab, Departments, Holidays, Payroll runs (create, finalize, PDF/XLSX), Reports |
+
+Rules enforced in the UI (and by the API): the first login forces a password change; a temporary password is shown once;
+salary appears **only** when the API returns it, so managers never see their reports' pay.
+
+![Approvals](docs/screenshots/manager-approvals.png)
+![Reports](docs/screenshots/hr-reports.png)
+
+Frontend tests: `cd frontend && npm test -- --run` (Vitest + Testing Library, 154 tests, fetch mocked). The full flow
+(forced password change, check-in, leave request, manager approval, salary hidden from the manager) was also driven
+through a real browser against the Docker stack.
