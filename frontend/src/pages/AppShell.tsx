@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useCardGlow } from '../lib/useCardGlow';
 import { canSeeTeamScreens, isHrOrAdmin } from '../auth/roles';
 import { useAuth } from '../auth/useAuth';
 import { humanizeEnum } from '../lib/format';
@@ -16,6 +17,8 @@ interface NavItem {
 export function AppShell(): JSX.Element {
   const { user, role, isManager, logout } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
+  const location = useLocation();
+  useCardGlow();
 
   const mine: NavItem[] = [
     { to: '/', label: 'Dashboard' },
@@ -109,7 +112,9 @@ export function AppShell(): JSX.Element {
       </nav>
 
       <main className="content">
-        <Outlet />
+        <div key={location.pathname} className="page-enter">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

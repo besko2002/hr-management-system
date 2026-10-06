@@ -566,6 +566,10 @@ salary appears **only** when the API returns it, so managers never see their rep
 ![Approvals](docs/screenshots/manager-approvals.png)
 ![Reports](docs/screenshots/hr-reports.png)
 
-Frontend tests: `cd frontend && npm test -- --run` (Vitest + Testing Library, 154 tests, fetch mocked). The full flow
+The UI has a violet / pink / teal theme with motion throughout (page transitions, staggered cards, animated
+navigation, a cursor-following glow on cards, growing chart bars, modal and toast animations). Every animation
+switches off for visitors who enable *reduce motion* in their OS.
+
+Frontend tests: `cd frontend && npm test -- --run` (Vitest + Testing Library, 164 tests, fetch mocked). The full flow
 (forced password change, check-in, leave request, manager approval, salary hidden from the manager) was also driven
 through a real browser against the Docker stack.
