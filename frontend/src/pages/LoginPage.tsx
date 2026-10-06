@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { ApiError, errorMessage } from '../api/ApiError';
 import { useAuth } from '../auth/useAuth';
 import { Banner } from '../components/Banner';
+import { RotatingWord } from '../components/RotatingWord';
 import { describedBy, Field } from '../components/Field';
+import { useHeroMotion } from '../lib/useHeroMotion';
 import { validateEmail } from '../lib/validation';
 
 /** The only way in: there is no public registration, HR/ADMIN create accounts. */
@@ -14,6 +16,8 @@ export function LoginPage(): JSX.Element {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const heroRef = useHeroMotion();
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -43,7 +47,10 @@ export function LoginPage(): JSX.Element {
 
   return (
     <main className="auth-page auth-page--split">
-      <aside className="auth-hero" aria-label="About the system">
+      <aside className="auth-hero" aria-label="About the system" ref={heroRef}>
+        <span className="auth-orb auth-orb--a" aria-hidden="true" />
+        <span className="auth-orb auth-orb--b" aria-hidden="true" />
+        <span className="auth-orb auth-orb--c" aria-hidden="true" />
         <div className="auth-hero-inner">
           <div className="auth-logo" aria-hidden="true">
             <svg viewBox="0 0 32 32" width="34" height="34" role="presentation">
@@ -55,7 +62,11 @@ export function LoginPage(): JSX.Element {
             </svg>
             <span>HR Management</span>
           </div>
-          <h2 className="auth-hero-title">People, time and pay, in one place.</h2>
+          <h2 className="auth-hero-title">
+            Your <RotatingWord words={['people', 'leave', 'attendance', 'payroll']} />
+            <br />
+            <span className="auth-hero-accent">in one place.</span>
+          </h2>
           <p className="auth-hero-sub">
             A workspace for employees, managers and HR, built around how your company is actually
             organised.
@@ -114,10 +125,11 @@ export function LoginPage(): JSX.Element {
           </Field>
 
           <Field id="password" label="Password" error={passwordError} required>
+            <div className="password-wrap">
             <input
               id="password"
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               value={password}
               required
@@ -127,6 +139,18 @@ export function LoginPage(): JSX.Element {
                 setPassword(event.target.value);
               }}
             />
+            <button
+              type="button"
+              className="password-toggle"
+              aria-label={showPassword ? 'Hide characters' : 'Show characters'}
+              aria-pressed={showPassword}
+              onClick={() => {
+                setShowPassword((current) => !current);
+              }}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+            </div>
           </Field>
 
           <button type="submit" className="button button-primary button-block" disabled={busy}>
