@@ -562,6 +562,7 @@ docker compose --profile app up -d --build      # backend + PostgreSQL + fronten
 Rules enforced in the UI (and by the API): the first login forces a password change; a temporary password is shown once;
 salary appears **only** when the API returns it, so managers never see their reports' pay.
 
+![Sign in](docs/screenshots/login.png)
 ![Approvals](docs/screenshots/manager-approvals.png)
 ![Reports](docs/screenshots/hr-reports.png)
 

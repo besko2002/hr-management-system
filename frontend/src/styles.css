@@ -233,6 +233,203 @@ code {
   margin-top: 18px;
 }
 
+/* ---------- login: split layout ---------- */
+
+.auth-page--split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  place-items: stretch;
+  padding: 0;
+  background: var(--surface-sunken);
+}
+
+.auth-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 56px clamp(28px, 6vw, 84px);
+  color: #fff;
+  overflow: hidden;
+  background:
+    radial-gradient(900px 500px at 12% -10%, rgb(255 255 255 / 14%), transparent 60%),
+    radial-gradient(700px 480px at 110% 110%, rgb(255 255 255 / 10%), transparent 55%),
+    linear-gradient(145deg, #0c3b27 0%, var(--accent) 52%, #1f8a5b 100%);
+}
+
+.auth-hero::before,
+.auth-hero::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 14%);
+  pointer-events: none;
+}
+
+.auth-hero::before {
+  width: 520px;
+  height: 520px;
+  right: -190px;
+  top: -150px;
+}
+
+.auth-hero::after {
+  width: 340px;
+  height: 340px;
+  left: -120px;
+  bottom: -130px;
+}
+
+.auth-hero-inner {
+  position: relative;
+  max-width: 520px;
+}
+
+.auth-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 650;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+.auth-hero-title {
+  margin-top: 34px;
+  font-size: clamp(1.9rem, 3.2vw, 2.7rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  font-weight: 750;
+}
+
+.auth-hero-sub {
+  margin-top: 14px;
+  max-width: 440px;
+  color: rgb(255 255 255 / 80%);
+  font-size: 1.02rem;
+  line-height: 1.55;
+}
+
+.auth-features {
+  list-style: none;
+  margin: 34px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.auth-features li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 9%);
+  border: 1px solid rgb(255 255 255 / 14%);
+  backdrop-filter: blur(4px);
+  font-size: 0.93rem;
+  color: rgb(255 255 255 / 82%);
+  line-height: 1.4;
+}
+
+.auth-features strong {
+  display: block;
+  color: #fff;
+  font-size: 0.98rem;
+  margin-bottom: 2px;
+}
+
+.auth-feature-icon {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: rgb(255 255 255 / 16%);
+  font-size: 1rem;
+}
+
+.auth-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background:
+    radial-gradient(600px 320px at 100% 0%, var(--accent-wash), transparent 70%),
+    var(--surface-sunken);
+}
+
+.auth-card--login {
+  max-width: 410px;
+  padding: 34px 32px 30px;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgb(15 74 48 / 14%), 0 2px 6px rgb(22 32 43 / 6%);
+}
+
+.auth-card--login h1 {
+  font-size: 1.85rem;
+  letter-spacing: -0.02em;
+}
+
+.auth-card--login .auth-brand {
+  color: var(--accent);
+  font-weight: 650;
+}
+
+.auth-card--login .button-block {
+  margin-top: 6px;
+  padding: 11px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent) 0%, #1f8a5b 100%);
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgb(21 96 63 / 28%);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+.auth-card--login .button-block:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgb(21 96 63 / 34%);
+  filter: brightness(1.04);
+}
+
+.auth-card--login .button-block:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-footnote {
+  margin-top: 18px;
+  color: var(--ink-faint);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 880px) {
+  .auth-page--split {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-hero {
+    padding: 28px 24px;
+  }
+
+  .auth-hero-sub,
+  .auth-features {
+    display: none;
+  }
+
+  .auth-hero-title {
+    margin-top: 16px;
+    font-size: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-card--login .button-block {
+    transition: none;
+  }
+}
+
 /* ---------- shell ---------- */
 
 .shell {
