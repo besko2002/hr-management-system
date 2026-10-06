@@ -562,7 +562,11 @@ docker compose --profile app up -d --build      # backend + PostgreSQL + fronten
 Rules enforced in the UI (and by the API): the first login forces a password change; a temporary password is shown once;
 salary appears **only** when the API returns it, so managers never see their reports' pay.
 
-![Sign in](docs/screenshots/login.png)
+The sign-in page is a single animated page: the form stays hidden behind an **Enter workspace** button and appears
+on hover, click or keyboard focus (Escape closes it), with the *Sign in* title writing itself letter by letter.
+
+![Landing](docs/screenshots/login.png)
+![Sign in revealed](docs/screenshots/login-open.png)
 ![Approvals](docs/screenshots/manager-approvals.png)
 ![Reports](docs/screenshots/hr-reports.png)
 
@@ -570,6 +574,6 @@ The UI has a violet / pink / teal theme with motion throughout (page transitions
 navigation, a cursor-following glow on cards, growing chart bars, modal and toast animations). Every animation
 switches off for visitors who enable *reduce motion* in their OS.
 
-Frontend tests: `cd frontend && npm test -- --run` (Vitest + Testing Library, 164 tests, fetch mocked). The full flow
+Frontend tests: `cd frontend && npm test -- --run` (Vitest + Testing Library, 174 tests, fetch mocked). The full flow
 (forced password change, check-in, leave request, manager approval, salary hidden from the manager) was also driven
 through a real browser against the Docker stack.
