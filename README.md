@@ -574,6 +574,6 @@ The UI has a violet / pink / teal theme with motion throughout (page transitions
 navigation, a cursor-following glow on cards, growing chart bars, modal and toast animations). Every animation
 switches off for visitors who enable *reduce motion* in their OS.
 
-Frontend tests: `cd frontend && npm test -- --run` (Vitest + Testing Library, 174 tests, fetch mocked). The full flow
+Frontend tests: `cd frontend && npm test -- --run` (Vitest + Testing Library, 177 tests, fetch mocked). The full flow
 (forced password change, check-in, leave request, manager approval, salary hidden from the manager) was also driven
 through a real browser against the Docker stack.

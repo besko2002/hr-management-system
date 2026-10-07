@@ -1,7 +1,7 @@
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { RotatingWord } from '../components/RotatingWord';
+import { RotatingWord, WORD_EXIT_MS } from '../components/RotatingWord';
 import { installFetchMock, renderApp } from '../test/helpers';
 
 function mockMotion(reduce: boolean): void {
@@ -50,24 +50,50 @@ describe('sign-in page extras', () => {
 });
 
 describe('RotatingWord', () => {
-  it('cycles through the words, wraps around, and tells screen readers only the first word', () => {
+  it('eases through the words (fade out, then fade in), wraps around, and tells screen readers only the first word', () => {
     mockMotion(false);
     vi.useFakeTimers();
     const { container } = render(<RotatingWord words={['people', 'leave', 'payroll']} intervalMs={1000} />);
 
-    const visible = (): string => container.querySelector('.rotating-word-item')?.textContent ?? '';
-    expect(visible()).toBe('people');
+    const item = (): Element | null => container.querySelector('.rotating-word-item');
+    expect(item()?.textContent).toBe('people');
     expect(container.querySelector('.sr-only')).toHaveTextContent('people');
-    expect(container.querySelector('.rotating-word-item')).toHaveAttribute('aria-hidden', 'true');
+    expect(item()).toHaveAttribute('aria-hidden', 'true');
 
+    // after the dwell time the word starts fading out, but is still the same word
     act(() => {
       vi.advanceTimersByTime(1000);
     });
-    expect(visible()).toBe('leave');
+    expect(item()?.textContent).toBe('people');
+    expect(item()).toHaveClass('rotating-word-item--out');
+
+    // once the exit animation is over the next word takes its place
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(WORD_EXIT_MS);
     });
-    expect(visible()).toBe('people');
+    expect(item()?.textContent).toBe('leave');
+    expect(item()).not.toHaveClass('rotating-word-item--out');
+
+    // t = 1520 now. The next swaps land at 2520 (payroll) and 3520 (back to the first word).
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(item()?.textContent).toBe('payroll');
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(item()?.textContent).toBe('people');
+  });
+
+  it('keeps each word on screen for several seconds by default', () => {
+    mockMotion(false);
+    vi.useFakeTimers();
+    const { container } = render(<RotatingWord words={['people', 'leave']} />);
+    act(() => {
+      vi.advanceTimersByTime(3500);
+    });
+    expect(container.querySelector('.rotating-word-item')?.textContent).toBe('people');
+    expect(container.querySelector('.rotating-word-item')).not.toHaveClass('rotating-word-item--out');
   });
 
   it('does not animate for visitors who asked for reduced motion', () => {

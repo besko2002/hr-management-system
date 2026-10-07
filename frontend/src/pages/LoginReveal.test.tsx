@@ -48,13 +48,17 @@ describe('sign-in page: form revealed on hover or click', () => {
     const trigger = await screen.findByRole('button', { name: /enter workspace/i });
 
     await user.hover(trigger);
+    expect(page()).not.toHaveClass('auth-page--open'); // not at once: hover intent
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
     expect(page()).toHaveClass('auth-page--open');
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
     await user.unhover(trigger);
-    expect(page()).toHaveClass('auth-page--open'); // not instantly: there is a short grace period
+    expect(page()).toHaveClass('auth-page--open'); // not instantly: there is a grace period
     act(() => {
-      vi.advanceTimersByTime(600);
+      vi.advanceTimersByTime(1000);
     });
     expect(page()).not.toHaveClass('auth-page--open');
   });
@@ -119,6 +123,9 @@ describe('sign-in page: form revealed on hover or click', () => {
     const user = setup();
     const trigger = await screen.findByRole('button', { name: /enter workspace/i });
     await user.hover(trigger);
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
     await user.click(screen.getByLabelText(/^work email/i));
     await user.unhover(trigger);
     act(() => {
@@ -131,6 +138,9 @@ describe('sign-in page: form revealed on hover or click', () => {
     const user = setup();
     const trigger = await screen.findByRole('button', { name: /enter workspace/i });
     await user.hover(trigger);
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
     // the form pops up over the button, so the visitor's click lands on the card, not the button
     await user.click(screen.getByText(/accounts are created by hr/i));
     await user.unhover(trigger);
@@ -139,5 +149,27 @@ describe('sign-in page: form revealed on hover or click', () => {
     });
     expect(page()).toHaveClass('auth-page--open');
     expect(screen.getByLabelText(/^work email/i)).toHaveFocus();
+  });
+
+  it('does not open when the pointer only sweeps across the button', async () => {
+    const user = setup();
+    const trigger = await screen.findByRole('button', { name: /enter workspace/i });
+
+    await user.hover(trigger);
+    act(() => {
+      vi.advanceTimersByTime(300); // less than the hover-intent delay
+    });
+    await user.unhover(trigger);
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(page()).not.toHaveClass('auth-page--open');
+  });
+
+  it('a click opens immediately, without waiting for the hover delay', async () => {
+    const user = setup();
+    await user.click(await screen.findByRole('button', { name: /enter workspace/i }));
+    expect(page()).toHaveClass('auth-page--open');
   });
 });

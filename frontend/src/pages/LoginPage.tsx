@@ -7,6 +7,11 @@ import { describedBy, Field } from '../components/Field';
 import { useHeroMotion } from '../lib/useHeroMotion';
 import { validateEmail } from '../lib/validation';
 
+/** Pointer must rest this long on the entrance button before the form eases in. */
+const HOVER_INTENT_MS = 650;
+/** Grace period before a hover-peek closes again after the pointer leaves. */
+const HIDE_DELAY_MS = 900;
+
 /** The only way in: there is no public registration, HR/ADMIN create accounts. */
 export function LoginPage(): JSX.Element {
   const { login, notice, clearNotice } = useAuth();
@@ -25,12 +30,14 @@ export function LoginPage(): JSX.Element {
   const [focusRequest, setFocusRequest] = useState(0);
   const pinned = useRef(false);
   const hideTimer = useRef<number | undefined>(undefined);
+  const hoverTimer = useRef<number | undefined>(undefined);
   const zoneRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
 
   function reveal(pin: boolean): void {
     window.clearTimeout(hideTimer.current);
+    window.clearTimeout(hoverTimer.current);
     if (pin) {
       pinned.current = true;
     }
@@ -48,11 +55,30 @@ export function LoginPage(): JSX.Element {
       if (!pinned.current && !(zoneRef.current?.contains(document.activeElement) ?? false)) {
         setOpen(false);
       }
-    }, 450);
+    }, HIDE_DELAY_MS);
+  }
+
+  // Hover intent: the form only appears once the pointer has rested on the button for a moment, so
+  // sweeping the mouse across the page does not make it pop up.
+  function hoverIn(): void {
+    window.clearTimeout(hideTimer.current);
+    if (open) {
+      return;
+    }
+    window.clearTimeout(hoverTimer.current);
+    hoverTimer.current = window.setTimeout(() => {
+      reveal(false);
+    }, HOVER_INTENT_MS);
+  }
+
+  function hoverOut(): void {
+    window.clearTimeout(hoverTimer.current);
+    scheduleHide();
   }
 
   function hide(): void {
     window.clearTimeout(hideTimer.current);
+    window.clearTimeout(hoverTimer.current);
     pinned.current = false;
     setOpen(false);
     triggerRef.current?.focus();
@@ -69,6 +95,7 @@ export function LoginPage(): JSX.Element {
   useEffect(() => {
     return () => {
       window.clearTimeout(hideTimer.current);
+      window.clearTimeout(hoverTimer.current);
     };
   }, []);
 
@@ -149,10 +176,8 @@ export function LoginPage(): JSX.Element {
         <div
           className="auth-zone"
           ref={zoneRef}
-          onPointerEnter={() => {
-            reveal(false);
-          }}
-          onPointerLeave={scheduleHide}
+          onPointerEnter={hoverIn}
+          onPointerLeave={hoverOut}
           onFocus={() => {
             reveal(true);
           }}
