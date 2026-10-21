@@ -236,6 +236,26 @@ class AccessMatrixIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void nobodyCanChangeTheirOwnSalary() throws Exception {
+        mvc.perform(patch("/api/employees/" + hr.id()).header("Authorization", bearer(tokenOf(hr)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of("salary", 99999))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("You cannot change your own salary"));
+
+        // Another HR/ADMIN still can, and re-sending the same amount is not a change.
+        mvc.perform(patch("/api/employees/" + hr.id()).header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of("salary", 7000))))
+                .andExpect(status().isOk());
+        mvc.perform(patch("/api/employees/" + hr.id()).header("Authorization", bearer(tokenOf(hr)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of("salary", 7000.00, "jobTitle", "HR Lead"))))
+                .andExpect(status().isOk());
+        getAs(admin, "/api/employees/" + hr.id()).andExpect(jsonPath("$.salary").value(7000.0));
+    }
+
+    @Test
     void anAdminCannotChangeTheirOwnRoleEither() throws Exception {
         UUID adminId = UUID.fromString(body(getAs(admin, "/api/employees/me")).path("id").asText());
         mvc.perform(patch("/api/employees/" + adminId).header("Authorization", bearer(admin))

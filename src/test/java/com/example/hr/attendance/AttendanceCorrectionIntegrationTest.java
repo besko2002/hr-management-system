@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** HR corrections: who may make them, what they record and everything they refuse. */
@@ -22,6 +23,19 @@ class AttendanceCorrectionIntegrationTest extends AbstractAttendanceIntegrationT
     private String managerToken;
     private NewEmployee staff;
     private String staffToken;
+
+    @Test
+    void hrCannotAddOrCorrectTheirOwnAttendance() throws Exception {
+        addSession(hrToken, hr.id(), at(march(4), "09:00"), at(march(4), "23:00"), "overtime")
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("You cannot add or correct your own attendance"));
+
+        UUID sessionId = addSessionOk(adminToken, hr.id(), march(5), "09:00", "17:00");
+        correctSession(hrToken, sessionId, at(march(5), "08:00"), at(march(5), "22:00"), "stayed late")
+                .andExpect(status().isForbidden());
+        correctSession(adminToken, sessionId, at(march(5), "08:30"), at(march(5), "17:00"), "badge fix")
+                .andExpect(status().isOk());
+    }
 
     @BeforeEach
     void setUp() throws Exception {

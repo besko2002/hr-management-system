@@ -168,6 +168,8 @@ docker build -t hr-management-system:local .
 - **Unknown-to-you employees answer 404, not 403**, so ids cannot be probed.
 - **Only ADMIN** may grant or revoke the ADMIN role or modify an ADMIN account; nobody may
   change their own role.
+- **Nobody changes their own pay**: HR and ADMIN cannot edit their own salary or add/correct
+  their own attendance sessions (attendance feeds payroll overtime); another HR/ADMIN must.
 - **Terminated accounts lose access immediately**: a terminated employee cannot log in (same
   generic message as a wrong password), and already-issued tokens are rejected by
   `ActiveEmployeeFilter`, which does one indexed primary-key status lookup per request.

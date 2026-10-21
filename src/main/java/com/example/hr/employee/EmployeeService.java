@@ -121,6 +121,7 @@ public class EmployeeService {
         Employee target = require(id);
         policy.requireCanManage(actor, target, "update");
         policy.requireCanAssignRole(actor, target, request.role());
+        policy.requireCanChangeSalary(actor, target, request.salary());
 
         applyEmail(target, request.email());
         target.rename(request.fullName().trim());
@@ -160,6 +161,7 @@ public class EmployeeService {
             target.changeHireDate(request.hireDate());
         }
         if (request.salary() != null) {
+            policy.requireCanChangeSalary(actor, target, request.salary());
             target.changeSalary(request.salary());
         }
         return EmployeeMapper.withSalary(employees.save(target));
