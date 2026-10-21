@@ -1,0 +1,9 @@
+node_modules/
+dist/
+
+# local tooling noise
+*.local
+.DS_Store
+.eslintcache
+node_modules/.tmp/
+*.tsbuildinfo

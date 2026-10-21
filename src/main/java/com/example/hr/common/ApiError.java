@@ -1,0 +1,38 @@
+package com.example.hr.common;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.time.Instant;
+import java.util.Map;
+
+/**
+ * Uniform error body for every failed API call.
+ *
+ * @param fieldErrors per-field validation messages; omitted from JSON when absent.
+ * @param mustChangePassword true on the 403 sent while the caller must first change their
+ *                           password; omitted otherwise.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record ApiError(
+        Instant timestamp,
+        int status,
+        String error,
+        String message,
+        String path,
+        Map<String, String> fieldErrors,
+        Boolean mustChangePassword) {
+
+    public static ApiError of(int status, String error, String message, String path) {
+        return new ApiError(Instant.now(), status, error, message, path, null, null);
+    }
+
+    public static ApiError of(int status, String error, String message, String path,
+                              Map<String, String> fieldErrors) {
+        return new ApiError(Instant.now(), status, error, message, path, fieldErrors, null);
+    }
+
+    /** The 403 for an account that still has to replace its password. */
+    public static ApiError mustChangePassword(String message, String path) {
+        return new ApiError(Instant.now(), 403, "Forbidden", message, path, null, true);
+    }
+}
