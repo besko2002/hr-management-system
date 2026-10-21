@@ -6,6 +6,9 @@ import com.example.hr.employee.Employee;
 import com.example.hr.employee.Role;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
 /**
  * The single place where "who may see or change what" is decided.
  *
@@ -84,6 +87,23 @@ public class EmployeeAccessPolicy {
         }
         if (isSelf(actor, target) && newRole != target.getRole()) {
             throw new ForbiddenException("You cannot change your own role");
+        }
+    }
+
+    /** Nobody changes their own pay: HR and ADMIN set everybody's salary except their own. */
+    public void requireCanChangeSalary(Employee actor, Employee target, BigDecimal newSalary) {
+        BigDecimal current = target.getSalary();
+        boolean unchanged = current == null ? newSalary == null
+                : newSalary != null && current.compareTo(newSalary) == 0;
+        if (isSelf(actor, target) && !unchanged) {
+            throw new ForbiddenException("You cannot change your own salary");
+        }
+    }
+
+    /** Attendance feeds payroll, so HR cannot add or correct their own sessions either. */
+    public void requireNotOwnAttendance(Employee actor, UUID employeeId) {
+        if (actor.getId().equals(employeeId)) {
+            throw new ForbiddenException("You cannot add or correct your own attendance");
         }
     }
 

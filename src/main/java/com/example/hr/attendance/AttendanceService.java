@@ -186,6 +186,7 @@ public class AttendanceService {
         policy.requireHrOrAdmin(actor, "correct attendance sessions");
         AttendanceSession session = sessions.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("No attendance session with id " + sessionId));
+        policy.requireNotOwnAttendance(actor, session.employeeId());
 
         validate(body.checkIn(), body.checkOut());
         requireNoOverlap(session.employeeId(), body.checkIn(), body.checkOut(), session.getId());
@@ -197,6 +198,7 @@ public class AttendanceService {
     public SessionResponse addSession(UUID employeeId, CorrectSessionBody body) {
         Employee actor = currentEmployee.require();
         policy.requireHrOrAdmin(actor, "add attendance sessions");
+        policy.requireNotOwnAttendance(actor, employeeId);
         Employee target = require(employeeId);
 
         validate(body.checkIn(), body.checkOut());
