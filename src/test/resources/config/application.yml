@@ -1,0 +1,8 @@
+# Test-only overrides, layered on top of src/main/resources/application.yml
+# (classpath:/config/ has higher precedence than classpath:/).
+app:
+  jwt:
+    secret: test-only-hr-secret-0123456789abcdef-0123456789
+  bootstrap-admin:
+    email: admin@hr.local
+    password: Admin@12345
