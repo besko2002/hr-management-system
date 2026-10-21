@@ -601,3 +601,7 @@ switches off for visitors who enable *reduce motion* in their OS.
 Frontend tests: `cd frontend && npm test -- --run` (Vitest + Testing Library, fetch mocked). The full flow
 (forced password change, check-in, leave request, manager approval, salary hidden from the manager) was also driven
 through a real browser against the Docker stack.
+
+## License
+
+[MIT](LICENSE)
